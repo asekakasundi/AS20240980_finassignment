@@ -27,7 +27,7 @@ public class AS20240980_finassignment {
   
     public static void main(String[] args) {
        
-        String cities []=readCityFile ();
+        String[] cities =readCityFile ();
         totCity = cities.length;
         
         for(int i=0; i<totCity; i++){
@@ -54,34 +54,45 @@ public class AS20240980_finassignment {
                     int subChoice = sc.nextInt();
                     sc.nextLine();
                     
-                    /*while (true){
+                    int k=0;
+                    while (k==0){
+                        k=+1;
                         switch (subChoice){
                         case 1:
                             
                             if (totCity == 30){
                                 System.out.println("Cannot add a new city. Maximum number of cities reached.");
+                                break;
                             }
-                            else{
+                              
+                            if (totCity<30){
+                                
                                 System.out.println("Enter city name: ");
                                 String newCity = sc.nextLine().toUpperCase();
                                 
-                                checkDuplictaeCity(cities,newCity); // Check the uniquness
+                                boolean duplicateStatus = checkDuplictaeCity(cities,newCity);// Check the uniquness
                                 
-                                if (newCity.isEmpty()){
-                                        System.out.println("Please enter a valid city");
-                                    }
+                                if(duplicateStatus){
+                                    System.out.println("Error! The city already exists ");
+                                }
+                                else if (newCity.isEmpty()){
+                                System.out.println("Please enter a valid city");
+                                }
+                                else if (newCity.isBlank()){
+                                System.out.println("Please enter a valid city");
+                                }
                                 else{
-                                    writetoCityFile(newCity);
-                                    break;
-                                    }
-                               
-                            }
-                            break;
+                                writetoCityFile(newCity,cities);
+                                cities = readCityFile ();
+                                totCity = cities.length;
+                                break;
+                                }
+                            }break;
                            
                         case 2:
                             
                         }
-                    }*/
+                    }
                     
             }
         }
@@ -99,11 +110,8 @@ public class AS20240980_finassignment {
                     String str = line;
                     arr = str.split(" ");
                     
-                }
-                        
-                      
+                }      
             }
-           
         }
         
         catch(FileNotFoundException e){
@@ -116,10 +124,12 @@ public class AS20240980_finassignment {
     return arr;  
     }
     
-    public static void writetoCityFile(String str){
-        try(FileWriter writer = new FileWriter(cityFilePath)){
-            writer.write(str+"\n");
+    public static void writetoCityFile(String str, String[] arr2){
+        try(FileWriter writer = new FileWriter(cityFilePath,true)){
+            writer.write(str+" ");
             System.out.println("City has been added Successfully!");
+            
+            
             
         }
         catch(IOException e){
@@ -127,14 +137,16 @@ public class AS20240980_finassignment {
         }
     }
     
-    public static void checkDuplictaeCity(String arr[],String str){
+    public static boolean checkDuplictaeCity(String[] arr,String str){
+        boolean status = false;
         for (int i=0; i<totCity; i++){
             if (arr[i].equals(str)){
-                System.out.println("Error! The city already exists");
+                status = true;
                 break;
             }
+            
         }
-        
+       return status; 
     }
     
 }
