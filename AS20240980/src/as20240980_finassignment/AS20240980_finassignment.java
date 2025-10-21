@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
 
 
 
@@ -14,6 +16,7 @@ public class AS20240980_finassignment {
     
     static int totCity = 0;
     static String cityFilePath = "C:\\Users\\DELL\\Desktop\\AS20240980\\city.txt";
+    static String interCityPath = "C:\\Users\\DELL\\Desktop\\AS20240980\\intercity distance.txt";
     
   static String[] vehicle = {"Van", "Truck", "Lorry"}; // 1- Van 2- Truck 3- Lorry
   static int[][] vehicleData = {{1000, 30, 60, 12},{5000, 40, 50, 60},{10000, 80, 45, 4}};
@@ -30,11 +33,19 @@ public class AS20240980_finassignment {
        
         String[] cities =readCityFile ();
         totCity = cities.length;
+        
+        int[][] intercityDistance = readInterCityFile();
+        for(int i=0; i<totCity; i++){
+            for (int j=0; j<totCity; j++){
+                System.out.println(intercityDistance[i][j]);
+            }
+        }
+        
    
         
         System.out.println("=============== Logistic Management System ==============");
         System.out.println("1. Manage Cities");
-        System.out.println("2. Manage Distance between cities");
+        System.out.println("2. Manage Intercity Distance");
         System.out.println("3. Delivery Request");
         System.out.println("4. Performance Report");
         System.out.println("5.Exit");
@@ -116,6 +127,16 @@ public class AS20240980_finassignment {
                             break;
                         }
                     }
+                case 2:// Manage distance
+                    System.out.println("========== Manage Intercity Distance ==========");
+                    System.out.println("1. Input distance between two cities ");
+                    System.out.println("2. Edit distance between twi cities ");
+                    System.out.println("3. Distance table");
+                    System.out.println("4. Exit");
+                    System.out.println("Enter your choice: ");
+                    
+                    break;
+                    
                     
             }
         }
@@ -280,4 +301,52 @@ public class AS20240980_finassignment {
         return arr;
     }
     
+    
+     
+        
+
+
+    
+    
+    
+    public static int[][] readInterCityFile() {
+        List<int[]> rows = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(interCityPath))) {
+            System.out.println("File exists\n");
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                // Keep only digits and spaces
+                line = line.replaceAll("[^0-9\\s]", "");
+
+                // Split numbers by one or more spaces
+                String[] strArray = line.trim().split("\\s+");
+
+                // Convert string numbers to int[]
+                int[] intRow = new int[strArray.length];
+                for (int i = 0; i < strArray.length; i++) {
+                    intRow[i] = Integer.parseInt(strArray[i]);
+                }
+
+                // Add row to the list
+                rows.add(intRow);
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + e.getMessage());
+            return null;
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+            return null;
+        }
+
+        // Convert the list of rows to a 2D array
+        return rows.toArray(new int[rows.size()][]);
+    }
+
+
 }
