@@ -15,8 +15,8 @@ import java.util.ArrayList;
 public class AS20240980_finassignment {
     
     static int totCity = 0;
-    static String cityFilePath = "C:\\Users\\DELL\\Desktop\\AS20240980\\city.txt";
-    static String interCityPath = "C:\\Users\\DELL\\Desktop\\AS20240980\\intercity distance.txt";
+    static String cityFilePath = "city.txt";
+    static String interCityPath = "intercity distance.txt";
     
   static String[] vehicle = {"Van", "Truck", "Lorry"}; // 1- Van 2- Truck 3- Lorry
   static int[][] vehicleData = {{1000, 30, 60, 12},{5000, 40, 50, 60},{10000, 80, 45, 4}};
@@ -34,16 +34,12 @@ public class AS20240980_finassignment {
         String[] cities =readCityFile ();
         totCity = cities.length;
         
-        int[][] intercityDistance = readInterCityFile();
-        for(int i=0; i<totCity; i++){
-            for (int j=0; j<totCity; j++){
-                System.out.println(intercityDistance[i][j]);
-            }
-        }
+        double[][] intercityDistance = readInterCityFile();
         
    
-        
-        System.out.println("=============== Logistic Management System ==============");
+        while(true){
+            
+        System.out.println("=============== Logistic Management System ==============");// main menue
         System.out.println("1. Manage Cities");
         System.out.println("2. Manage Intercity Distance");
         System.out.println("3. Delivery Request");
@@ -52,23 +48,22 @@ public class AS20240980_finassignment {
         System.out.println("Enter your choice: ");
         int choice= sc.nextInt();
        
-        while(true){
+        
             switch(choice){
-             
+                
+            
                 case 1://Manage cities
+                    
                     System.out.println("========== Manage Cities ==========");
                     System.out.println("1. Add a new City");
                     System.out.println("2. Remove city ");
                     System.out.println("3. Rename a city");
                     System.out.println("4.Exit");
                     System.out.println("Enter your choice: ");
-                    int subChoice = sc.nextInt();
+                    int subChoice1 = sc.nextInt();
                     sc.nextLine();
                     
-                    int k=0;
-                    while (k==0){
-                        k=+1;
-                        switch (subChoice){
+                        switch (subChoice1){
                         case 1:// Add a new city
                             
                             if (totCity == 30){
@@ -93,23 +88,30 @@ public class AS20240980_finassignment {
                                 System.out.println("Please enter a valid city");
                                 }
                                 else{
-                                writetoCityFile(newCity);
                                 
-                                cities = updateCityArray();
+                                cities = addItemToArray(cities, newCity);
+                                totCity = cities.length;
                                 
+                                for(int i=0; i<totCity; i++){
+                                    System.out.println(cities[i]);
                                 }
+                                intercityDistance = addRowAndColumn(intercityDistance);
+                                                                }
                             }
-                            break;
+                        break;
                            
                         case 2:// Delete a city
                             System.out.println("Enter city name: ");
                             String city =sc.nextLine().toUpperCase();
                             
+                            int val = checkCity(cities, city);
+                            
                             cities = deleteCity(city,cities);
                             totCity = cities.length;
                             
-                            
-                            break;    
+                            intercityDistance = removeRowAndColumn(intercityDistance, val);
+                              
+                        break;    
                             
                         case 3://rename name a city
                             System.out.println("Enter city name to be replaced: ");
@@ -119,27 +121,72 @@ public class AS20240980_finassignment {
                             String newCity =sc.nextLine().toUpperCase();
                             renameCity(cities, originalCity,newCity );
                             
-                            cities = updateCityArray();
-                            break;
+                            for (int j=0; j<totCity; j++){
+                System.out.println(cities[j]);
+            }
+                        break;
                             
+                        case 4:
+                        System.out.println("Exit for Main Menue successfully!");
+                        break;
+                        
                         default:
-                            System.out.println("Exit for Main Menue successfully!");
+                            System.out.println("Please enter a valid input.");
                             break;
-                        }
-                    }
-                case 2:// Manage distance
+                        } 
+                    
+                break;       
+                    
+                    
+                case 2:{// Manage distance
                     System.out.println("========== Manage Intercity Distance ==========");
                     System.out.println("1. Input distance between two cities ");
-                    System.out.println("2. Edit distance between twi cities ");
+                    System.out.println("2. Edit distance between two cities ");
                     System.out.println("3. Distance table");
                     System.out.println("4. Exit");
                     System.out.println("Enter your choice: ");
+                    int subChoice2 = sc.nextInt();
                     
-                    break;
+                        switch (subChoice2){
+                        case 1:
+                            
+                            double cityDistance=0.0;
+                            
+                            System.out.println("Enter the starting city: ");
+                            sc.nextLine();
+                            String startingCity = sc.nextLine().toUpperCase();
+                            
+                            System.out.println("Enter the destination city: ");
+                            String destinationCity = sc.nextLine().toUpperCase();
+                            
+                            
+                            if (startingCity.equals(destinationCity)){
+                                System.out.println("Please enter distant cities: ");
+                            }
+                            else{
+                                System.out.println("Enter the distance between two cities: ");
+                                cityDistance = sc.nextDouble();
+                                
+                                int startingCityVal = checkCity(cities, startingCity);
+                                int destinationCityVal = checkCity(cities, destinationCity);
+
+                                if (startingCityVal == 30 || destinationCityVal == 30) {
+                                    System.out.println("Error: One or both cities not found! Please enter valid city names.\n");
+                                    } else {
+                                        intercityDistance = editIntercityDistanceArr(startingCityVal, destinationCityVal, cityDistance, intercityDistance);
+                                    }
+                            
+                            }
+                            
+                            break;
+                        }
                     
                     
+                 
+                }  
+                
             }
-        }
+        }       
     }
     
     
@@ -194,7 +241,7 @@ public class AS20240980_finassignment {
     
     
     public static void writetoCityFile(String str){
-        try(FileWriter writer = new FileWriter(cityFilePath,true)){
+        try(FileWriter writer = new FileWriter(cityFilePath)){
             writer.write(str+" ");
             System.out.println("City has been added Successfully!\n\n");
         }
@@ -245,32 +292,13 @@ public class AS20240980_finassignment {
                    j++;
                }
             } 
-            rewritetoCityFile(newArr);
+            
             System.out.println("City Removed Succesfully!\n\n");
         }
         
         return newArr;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public static void rewritetoCityFile(String[] strArr){
-        try(FileWriter writer = new FileWriter(cityFilePath)){
-            for (String strArr1 : strArr) {
-                writer.write(strArr1 + " "); 
-            }
-          
-        }
-        catch(IOException e){
-            System.out.println("Error: "+e.getMessage());
-        }
-    }
+   
     
     
     
@@ -279,13 +307,18 @@ public class AS20240980_finassignment {
     
     public static void renameCity(String[] arr, String str1,String str2){
         int i = checkCity(arr, str1);
+        int j = checkCity(arr, str2);
         if (i==30){
                 System.out.println("City does not exists!\n\n");
             }
         else{
-            arr[i]=str2;
-            System.out.println("City renamed successfully!\n\n");
-            rewritetoCityFile(arr);
+            if(j==30){
+                arr[i]=str2;
+                System.out.println("City renamed successfully!\n\n");
+            }
+            else{
+                System.out.println("City already exists!\n\n");
+            }
         }
         
     }
@@ -295,11 +328,19 @@ public class AS20240980_finassignment {
     
     
     
-    public static String[] updateCityArray(){
-        String[] arr = readCityFile ();
-        totCity = arr.length;
-        return arr;
+    public static String[] addItemToArray(String[] oldArray, String str) {
+    String[] newArray = new String[oldArray.length + 1]; // +1 for the new item
+
+    // Copy old elements
+    for (int i = 0; i < oldArray.length; i++) {
+        newArray[i] = oldArray[i];
     }
+
+    // Add the new one at the end
+    newArray[oldArray.length] = str;
+
+    return newArray;
+}
     
     
      
@@ -309,11 +350,10 @@ public class AS20240980_finassignment {
     
     
     
-    public static int[][] readInterCityFile() {
-        List<int[]> rows = new ArrayList<>();
+    public static double[][] readInterCityFile() {
+        List<double[]> rows = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(interCityPath))) {
-            System.out.println("File exists\n");
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -327,13 +367,14 @@ public class AS20240980_finassignment {
                 String[] strArray = line.trim().split("\\s+");
 
                 // Convert string numbers to int[]
-                int[] intRow = new int[strArray.length];
+                double[] doubleRow = new double[strArray.length];
                 for (int i = 0; i < strArray.length; i++) {
-                    intRow[i] = Integer.parseInt(strArray[i]);
+                    doubleRow[i] = Double.parseDouble(strArray[i]);
+                    
                 }
 
                 // Add row to the list
-                rows.add(intRow);
+                rows.add(doubleRow);
             }
 
         } catch (FileNotFoundException e) {
@@ -345,8 +386,113 @@ public class AS20240980_finassignment {
         }
 
         // Convert the list of rows to a 2D array
-        return rows.toArray(new int[rows.size()][]);
+        return rows.toArray(new double[rows.size()][]);
+    }
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    public static void writetointerCityFile(double[][] arr){
+        try(FileWriter writer = new FileWriter(interCityPath)){
+            for(int i=0; i<totCity; i++){
+                for(int j=0; j<totCity; j++){
+                    writer.write(arr[i][j]+" ");
+                }
+                writer.write("\n");
+            }
+            
+        }
+        catch(IOException e){
+            System.out.println("Error: "+e.getMessage());
+        }
     }
 
 
+    
+    
+    
+    
+    
+    
+    public static double[][] addRowAndColumn(double[][] original) {
+    int oldRows = original.length;
+    int oldCols = original[0].length;
+    
+    // Create new array with +1 row and +1 column
+    double[][] newArray = new double[oldRows + 1][oldCols + 1];
+
+    // Copy old values
+    for (int i = 0; i < oldRows; i++) {
+        for (int j = 0; j < oldCols; j++) {
+            newArray[i][j] = original[i][j];
+        }
+    }
+
+    // Initialize the new row and column with zeros (or any value)
+    for (int i = 0; i < oldCols + 1; i++) {
+        newArray[oldRows][i] = 0.0; // new row
+    }
+    for (int i = 0; i < oldRows + 1; i++) {
+        newArray[i][oldCols] = 0.0; // new column
+    }
+
+    return newArray;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static double[][] editIntercityDistanceArr(int cityVal1, int cityVal2 , double distance, double[][] arr){
+        
+        arr[cityVal1][cityVal2]= arr[cityVal2][cityVal1]= distance;
+        
+        writetointerCityFile(arr);
+        System.out.println("City has been added successfully!");
+        
+        return arr;
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static double[][] removeRowAndColumn(double[][] arr, int index) {
+    
+
+    double[][] newArr = new double[totCity][totCity];
+    int newRow = 0;
+
+    for (int i = 0; i < totCity+1; i++) {
+        if (i == index) continue; // skip the removed row
+        int newCol = 0;
+        for (int j = 0; j < totCity+1; j++) {
+            if (j == index) continue; // skip the removed column
+            newArr[newRow][newCol] = arr[i][j];
+            newCol++;
+        }
+        newRow++;
+    }
+
+    return newArr;
+}
 }
