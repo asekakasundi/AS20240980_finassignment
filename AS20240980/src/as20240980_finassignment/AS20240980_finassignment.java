@@ -19,11 +19,12 @@ public class AS20240980_finassignment {
     static int totCity = 0;
     static String cityFilePath = "city.txt";
     static String interCityPath = "intercity distance.txt";
+    static String recordsPath = "records.txt";
     static double minDist = 0;
     
-  static String[] vehicle = {"Van", "Truck", "Lorry"}; // 1- Van 2- Truck 3- Lorry
+  static double[][] deliveryRecords = new double [50][4]; 
   static int[][] vehicleData = {{1000, 30, 60, 12},{5000, 40, 50, 60},{10000, 80, 45, 4}};
-  
+  // 1- Van 2- Truck 3- Lorry
   /* Type  Capacity(kg)  Rate per km(LKR)  Avg Speed(km/h)  Fuel Efficiency(km/l)
      Van     1000             30                60                12
      Truck   5000             40                50                 6
@@ -38,6 +39,10 @@ public class AS20240980_finassignment {
         totCity = cities.length;
         
         double[][] intercityDistance = readInterCityFile();
+    
+        deliveryRecords=readrecordsFile();
+        
+        
         
    
         while(true){//Main menue
@@ -255,13 +260,35 @@ public class AS20240980_finassignment {
                     System.out.println("2: Truck");
                     System.out.println("3: Lorry");
                     System.out.println("Enter vehicle index: ");
-                    int vehicleIndex = sc.nextInt();
+                    int vehicleIndex = sc.nextInt()-1;
+                    
                     
                     if(weight > vehicleData[vehicleIndex][0]){
                         System.out.println("Vehicle capacity exceeded. Please select another vehicle.");
                     }
                     else{
+                        double deliveryCost = getBaseCost(minDist, vehicleIndex,weight );
+                        double estDeliveryTime = getEstimatedDeliveryTime(minDist,vehicleIndex );
+                        double fuelConsumption = getFuelConsumption(minDist,vehicleIndex);
+                        double fuelCost = getFuelCost(fuelConsumption);
                         
+                        double totCost = deliveryCost + fuelCost;
+                        double profit = totCost*0.25;
+                        
+                        double customerCharge= totCost+ profit;
+                        
+                        System.out.println("---------------------------------------------------------------------------------------------------");
+                        System.out.printf("Base Cost: "+minDist+" x "+vehicleData[vehicleIndex][2]+" (1 + %.2f/10000) = %.2f LKR\n", weight,deliveryCost);
+                        System.out.printf("Fuel Used: %.2f L\n",fuelConsumption);
+                        System.out.printf("Fuel Cost: %.2f LKR\n",fuelCost);
+                        System.out.printf("Operational Cost: %.2f LKR\n",fuelCost);
+                        System.out.printf("Profit: %.2f LKR\n",profit);
+                        System.out.printf("Customer Charge: %.2f LKR\n",customerCharge);
+                        System.out.printf("Estimated time: %.2f hours\n",estDeliveryTime);
+                        System.out.println("---------------------------------------------------------------------------------------------------");
+                        
+                        deliveryRecords = editDeliveryrecords(estDeliveryTime,customerCharge,profit);
+                      
                     }
                     break;
                     
@@ -271,8 +298,11 @@ public class AS20240980_finassignment {
                     
                 case 5:// Exit and save data  
                     writetoCityFile(cities);
-                    writetointerCityFile(intercityDistance);
+                    write2DArraytoFile(intercityDistance,interCityPath);
+                    write2DArraytoFile(deliveryRecords, recordsPath);
+                    
                     System.exit(0);
+                    
                     break;
                     
                 default:
@@ -486,20 +516,20 @@ public class AS20240980_finassignment {
     
     
     
-    public static void writetointerCityFile(double[][] arr) {
+    public static void write2DArraytoFile(double[][] arr, String path) {
     if (arr == null || arr.length == 0) {
-        System.out.println("️No distance data to save.");
+        System.out.println("️No data to save.");
         return;
     }
 
-    try (FileWriter writer = new FileWriter(interCityPath, false)) {
+    try (FileWriter writer = new FileWriter(path, false)) {
         for (int i = 0; i < arr.length; i++) {
             for (int j = 0; j < arr[i].length; j++) {
                 writer.write(arr[i][j] + " ");
             }
             writer.write("\n");
         }
-        System.out.println("Intercity distances saved successfully!");
+        
     } catch (IOException e) {
         System.out.println("Error writing file: " + e.getMessage());
     }
@@ -573,6 +603,10 @@ public class AS20240980_finassignment {
 
     return newArr;
 }
+    
+    
+    
+    
     
     
     
@@ -674,5 +708,147 @@ public class AS20240980_finassignment {
     
     
     
+    public static double getBaseCost(double minDis, int vehicleIndex, double weight ){
+        // cost = minDis* rate per*(1+ (w* 1/10000))
+        
+        int rate = vehicleData[vehicleIndex][1];
+        
+        double cost = minDis*rate*(1+(weight/10000));
+       
+        
+     return cost;
+    }
     
+    
+    
+    
+    
+   
+    
+    
+    
+    public static double getEstimatedDeliveryTime(double minDis, int vehicleIndex ){
+        // time= Distance /speed
+        int speed = vehicleData[vehicleIndex][2];
+        double time= minDis/speed;
+        return time;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static double getFuelConsumption(double minDis, int vehicleIndex){
+        // Fuel Consumption = Distance / Efficiency
+        int efficiency = vehicleData[vehicleIndex][3];
+        double fuelCons= minDis/efficiency;
+        return fuelCons;
+    }
+    
+    
+    
+    
+    
+    
+    
+    public static double getFuelCost(double fuelUsed){
+        //fuelCost = fuelUsed*fuelPrice
+        
+        double fuelPrice = 310;
+        
+        double fuelCost = fuelUsed*fuelPrice;
+        return fuelCost;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+   public static double[][] readrecordsFile() {
+    double[][] distances = new double[50][4];
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(recordsPath))) {
+        String line;
+        int row = 0;
+
+        while ((line = reader.readLine()) != null && row < deliveryRecords.length) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] parts = line.split("\\s+");
+
+            for (int col = 0; col < parts.length && col < 4; col++){
+                try {
+                    distances[row][col] = Double.parseDouble(parts[col]);
+                } catch (NumberFormatException e) {
+                    distances[row][col] = 0.0; // fallback
+                }
+            }
+            row++;
+        }
+
+    } catch (FileNotFoundException e) {
+        System.out.println(" File not found. Starting with an empty table.");
+    } catch (IOException e) {
+        System.out.println("Error reading file: " + e.getMessage());
+    }
+
+    return distances;
+} 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    public static double[][] editDeliveryrecords(double estTime, double totAmount, double profit) {
+        // Find current filled rows (ignore empty rows)
+        int count = 0;
+        for (int i = 0; i < deliveryRecords.length; i++) {
+            if (deliveryRecords[i][0] != 0.0 || deliveryRecords[i][1] != 0.0 ||
+                deliveryRecords[i][2] != 0.0 || deliveryRecords[i][3] != 0.0) {
+                count++;
+            } 
+            else {
+            break;
+            }
+        }
+
+        // Create new array with one extra row
+        double[][] newArray = new double[count + 1][4];
+
+        // Copy existing non-zero records
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < 4; j++) {
+                newArray[i][j] = deliveryRecords[i][j];
+            }
+        }
+
+        // Add new record
+        newArray[count][0] = minDist;
+        newArray[count][1] = estTime;
+        newArray[count][2] = totAmount;
+        newArray[count][3] = profit;
+
+
+        return newArray;
 }
+
+}
+
+
+
