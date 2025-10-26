@@ -7,6 +7,10 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Arrays;
 
 
 
@@ -15,6 +19,7 @@ public class AS20240980_finassignment {
     static int totCity = 0;
     static String cityFilePath = "city.txt";
     static String interCityPath = "intercity distance.txt";
+    static double minDist = 0;
     
   static String[] vehicle = {"Van", "Truck", "Lorry"}; // 1- Van 2- Truck 3- Lorry
   static int[][] vehicleData = {{1000, 30, 60, 12},{5000, 40, 50, 60},{10000, 80, 45, 4}};
@@ -35,7 +40,7 @@ public class AS20240980_finassignment {
         double[][] intercityDistance = readInterCityFile();
         
    
-        while(true){
+        while(true){//Main menue
             
         System.out.println("=============== Logistic Management System ==============");// main menue
         System.out.println("1. Manage Cities");
@@ -64,7 +69,7 @@ public class AS20240980_finassignment {
                         switch (subChoice1){
                         case 1:// Add a new city
                             
-                            if (totCity == 30){
+                            if (totCity == 30){//check cities
                                 System.out.println("Cannot add a new city. Maximum number of cities reached.\n\n");
                                 break;
                             }
@@ -87,9 +92,9 @@ public class AS20240980_finassignment {
                                 }
                                 else{
                                 
-                                cities = addItemToArray(cities, newCity);
-                                totCity = cities.length;
-                                intercityDistance = addRowAndColumn(intercityDistance);
+                                cities = addItemToArray(cities, newCity);// adding item to array
+                                totCity = cities.length; // totCity = totCity + 1
+                                intercityDistance = addRowAndColumn(intercityDistance);// adds a row and column to the interCityDistance [][] array
                                 
                                 System.out.println("City has been added successfully!");
                                 }                                
@@ -105,7 +110,7 @@ public class AS20240980_finassignment {
                             cities = deleteCity(city,cities);
                             totCity = cities.length;
                             
-                            intercityDistance = removeRowAndColumn(intercityDistance, val);
+                            intercityDistance = removeRowAndColumn(intercityDistance, val);// removes a row and column to the interCityDistance [][] array
                               
                         break;    
                             
@@ -227,7 +232,37 @@ public class AS20240980_finassignment {
                 }
                   
                 case 3://Delivery Request
+                    System.out.println("===== Delivery Request =====");
                     
+                    for(int i=0; i<totCity; i++){
+                        int j = i+1;
+                        System.out.println(j+": "+cities[i]);
+                    }
+                    
+                    System.out.println("Enter Source City Index: ");
+                    int sourceCityIndex = sc.nextInt()-1; // maps to correct value
+                    
+                    System.out.println("Enter Destination City Index: ");
+                    int destCityIndex = sc.nextInt()-1; // maps to correct value
+                    
+                    List<Integer> path = findLeastCostRoute(intercityDistance, sourceCityIndex, destCityIndex, cities);
+                    
+                    System.out.println("Enter weight in kg:  ");
+                    double weight = sc.nextDouble();
+                    
+                    System.out.println("Choose vehicle type:");
+                    System.out.println("1: Van");
+                    System.out.println("2: Truck");
+                    System.out.println("3: Lorry");
+                    System.out.println("Enter vehicle index: ");
+                    int vehicleIndex = sc.nextInt();
+                    
+                    if(weight > vehicleData[vehicleIndex][0]){
+                        System.out.println("Vehicle capacity exceeded. Please select another vehicle.");
+                    }
+                    else{
+                        
+                    }
                     break;
                     
                 case 4://Performance Report
@@ -301,7 +336,6 @@ public class AS20240980_finassignment {
         try(FileWriter writer = new FileWriter(cityFilePath)){
             for(int i=0; i<totCity; i++){
                 writer.write(str[i]+" ");
-                System.out.println("Dava have been saved Successfully.!\n\n");
             }
         }
         catch(IOException e){
@@ -539,4 +573,106 @@ public class AS20240980_finassignment {
 
     return newArr;
 }
+    
+    
+    
+    
+    
+    
+    
+        // Method to find least-cost path
+    public static List<Integer> findLeastCostRoute(double[][] distance, int src, int dest, String[] cityNames) {
+    int n = distance.length;
+    List<Integer> cities = new ArrayList<>();
+
+    // Add intermediate cities (exclude src and dest)
+    for (int i = 0; i < n; i++) {
+        if (i != src && i != dest) {
+            cities.add(i);
+        }
+    }
+
+    // Start with direct path
+    minDist = distance[src][dest];
+    List<Integer> bestPath = new ArrayList<>(Arrays.asList(src, dest));
+
+    if (!cities.isEmpty()) {
+        List<List<Integer>> permutations = generatePermutations(cities);
+
+        for (List<Integer> perm : permutations) {
+            double currentDist = 0;
+            int currentCity = src;
+
+            for (int nextCity : perm) {
+                currentDist += distance[currentCity][nextCity];
+                currentCity = nextCity;
+            }
+            currentDist += distance[currentCity][dest];
+
+            if (currentDist < minDist) {
+                minDist = currentDist;
+                bestPath = new ArrayList<>();
+                bestPath.add(src);
+                bestPath.addAll(perm);
+                bestPath.add(dest);
+            }
+        }
+    }
+
+    // Print route with actual city names
+    System.out.println("Shortest Path:");
+    for (int i = 0; i < bestPath.size(); i++) {
+        System.out.print(cityNames[bestPath.get(i)]);
+        if (i < bestPath.size() - 1) System.out.print(" -> ");
+    }
+    System.out.println("\nTotal Distance: " + minDist);
+    System.out.println(" ");
+
+    // Return the path for future use
+    return bestPath;
+}
+    
+   
+
+    // Helper to generate permutations
+    public static List<List<Integer>> generatePermutations(List<Integer> cities) {
+        List<List<Integer>> result = new ArrayList<>();
+        permuteHelper(cities, 0, result);
+        return result;
+    }
+
+    private static void permuteHelper(List<Integer> arr, int index, List<List<Integer>> result) {
+        if (index == arr.size() - 1) {
+            result.add(new ArrayList<>(arr));
+            return;
+        }
+
+        for (int i = index; i < arr.size(); i++) {
+            Collections.swap(arr, i, index);
+            permuteHelper(arr, index + 1, result);
+            Collections.swap(arr, i, index);
+        }
+    }
+
+    // Optional: map city index to name
+    public static String cityName(int index) {
+        return switch (index) {
+            case 0 -> "A";
+            case 1 -> "B";
+            case 2 -> "C";
+            case 3 -> "D";
+            default -> "City" + index;
+        };
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
