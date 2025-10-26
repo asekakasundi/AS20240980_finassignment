@@ -40,7 +40,7 @@ public class AS20240980_finassignment {
         
         double[][] intercityDistance = readInterCityFile();
     
-        deliveryRecords=readrecordsFile();
+        deliveryRecords=readrecordsFile();// 0- distance 1- time 3- revenue 4- profit
         
         
         
@@ -293,6 +293,42 @@ public class AS20240980_finassignment {
                     break;
                     
                 case 4://Performance Report
+                    
+                    double totDelivery = deliveryRecords.length;
+                    double totDistance =0;
+                    double avgDeliveryTime =0; 
+                    double totRevenue =0;      
+                    double totProfit = 0; 
+                    
+                    for(int i=0; i<deliveryRecords.length;i++){
+                        totDistance =+ deliveryRecords[i][0];
+                        avgDeliveryTime =+ deliveryRecords[i][1];
+                        totRevenue =+ deliveryRecords[i][2];
+                        totProfit =+ deliveryRecords[i][3];
+                        
+                    }
+                    
+                    double maxDistance = deliveryRecords[0][0];
+                    double minDistance = deliveryRecords[0][0];
+                    
+                    for(int i=1; i<deliveryRecords.length; i++ ){
+                        if (maxDistance<deliveryRecords[i][0]){
+                            maxDistance = deliveryRecords[i][0];
+                        }
+                        if(minDistance>deliveryRecords[i][0]){
+                            minDistance = deliveryRecords[i][0];
+                        }
+                    }
+                    
+                    System.out.printf("Total Deliveries Completed: %.2f \n",totDelivery);
+                    System.out.printf("Total Distance Covered: %.2f km\n",totDistance);
+                    System.out.printf("Average Delivery Time: %.2f hours\n",avgDeliveryTime);
+                    System.out.printf("Total Revenue: %.2f LKR\n",totRevenue);
+                    System.out.printf("Total profit: %.2f LKR\n",totProfit);
+                    System.out.printf("Longest Route: %.2f km\n",maxDistance);
+                    System.out.printf("Shortest Route: %.2f LKR\n",minDistance);
+                    
+                    
                     
                     break;
                     
